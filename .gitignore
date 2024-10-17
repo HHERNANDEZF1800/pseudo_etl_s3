@@ -300,6 +300,7 @@ estructura_esperada.json
 migrar_s3v1_s3v2.ipynb
 estructura_esperada.json
 datos_reestructurados.json
+<<<<<<< HEAD
 data-*
 propiedades_faltantes.csv
 migrar_s3v1_s3v2.ipynb
@@ -309,3 +310,8 @@ scripts_migracion_python
 =======
 >>>>>>> 14d843d (Initial commit)
 
+=======
+propiedades_faltantes.csv
+migrar_s3v1_s3v2.ipynb
+migrar_s3v1_s3v2_old.ipynb
+>>>>>>> c3c5385 (script para migrar información de las entidades ya registradas y separar los registros de las faltas graves y no graves)
