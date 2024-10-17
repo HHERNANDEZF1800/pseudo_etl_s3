@@ -164,3 +164,10 @@ datos/
 esquemas/
 migracionS3/
 pruebas/
+estructura_esperada.json
+migrar_s3v1_s3v2.ipynb
+estructura_esperada.json
+datos_reestructurados.json
+propiedades_faltantes.csv
+migrar_s3v1_s3v2.ipynb
+migrar_s3v1_s3v2_old.ipynb
