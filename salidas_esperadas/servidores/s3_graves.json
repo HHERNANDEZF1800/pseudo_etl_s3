@@ -1,0 +1,101 @@
+[
+  {
+    "fecha": "",
+    "expediente": "",
+    "datosGenerales": {
+      "nombres": "",
+      "primerApellido": "",
+      "segundoApellido": "",
+      "curp": "",
+      "rfc": "",
+      "sexo": ""
+    },
+    "empleoCargoComision": {
+      "entidadFederativa": "",
+      "nivelOrdenGobierno": "",
+      "ambitoPublico": "",
+      "nombreEntePublico": "",
+      "siglasEntePublico": "",
+      "nivelJerarquico": {
+        "clave": "",
+        "valor": ""
+      },
+      "denominacion": "",
+      "areaAdscripcion": ""
+    },
+    "origenProcedimiento": {
+      "clave": "",
+      "valor": ""
+    },
+    "faltaCometida": [
+      {
+        "clave": "",
+        "valor": "",
+        "normatividadInfringida": [
+          {
+            "nombreNormatividad": "",
+            "articulo": "",
+            "fraccion": ""
+          }
+        ],
+        "descripcionHechos": ""
+      }
+    ],
+    "resolucion": {
+      "tituloDocumento": "",
+      "fechaResolucion": "",
+      "fechaNotificacion": "",
+      "urlResolucion": "",
+      "fechaResolucionFirme": "",
+      "fechaNotificacionFirme": "",
+      "urlResolucionFirme": "",
+      "autoridadResolutora": "",
+      "ordenJurisdiccional": "",
+      "fechaEjecucion": "",
+      "autoridadInvestigadora": "",
+      "autoridadSubstanciadora": ""
+    },
+    "tipoSancion": [
+      {
+        "clave": "",
+        "suspension": {
+          "plazoMeses": "",
+          "plazoDias": "",
+          "fechaInicial": "",
+          "fechaFinal": ""
+        },
+        "destitucionEmpleo": {
+          "fechaDestitucion": ""
+        },
+        "inhabilitacion": {
+          "plazoAnios": "",
+          "plazoMeses": "",
+          "plazoDias": "",
+          "fechaInicial": "",
+          "fechaFinal": ""
+        },
+        "sancion": {
+          "otro": {
+            "denominacionSancion": ""
+          }
+        },
+        "sancionEconomica": {
+          "monto": "",
+          "moneda": "",
+          "plazoPago": {
+            "anios": "",
+            "meses": "",
+            "dias": ""
+          },
+          "sancionEfectivamenteCobrada": {
+            "monto": "",
+            "moneda": "",
+            "fechaCobro": ""
+          },
+          "fechaPagoTotal": ""
+        }
+      }
+    ],
+    "observaciones": ""
+  }
+]

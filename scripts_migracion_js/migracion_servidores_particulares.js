@@ -2,20 +2,20 @@ const fs = require("fs").promises;
 const path = require("path");
 
 // Define input and output paths
-const inputDir = "../pruebas/datos_entrada/";
+const inputDir = "../pruebas/datos_entrada/s3s/";
 const outputDir = "../pruebas/datos_salida/";
 
 // Definición de tipos de faltas
 const faltasGraves = [
   "COHECHO O EXTORSION",
   "PECULADO",
-  "DESVÍO DE RECURSOS PÚBLICOS",
-  "UTILIZACIÓN INDEBIDA DE INFORMACIÓN",
+  "DESVIO DE RECURSOS PUBLICOS",
+  "UTILIZACION INDEBIDA DE INFORMACION",
   "ABUSO DE FUNCIONES",
-  "ACTUACIÓN BAJO CONFLICTO DE INTERÉS",
-  "CONTRATACIÓN INDEBIDA",
-  "ENRIQUECIMIENTO OCULTO U OCULTAMIENTO DE CONFLICTO DE INTERÉS",
-  "TRÁFICO DE INFLUENCIAS",
+  "ACTUACION BAJO CONFLICTO DE INTERES",
+  "CONTRATACION INDEBIDA",
+  "ENRIQUECIMIENTO OCULTO U OCULTAMIENTO DE CONFLICTO DE INTERES",
+  "TRAFICO DE INFLUENCIAS",
   "ENCUBRIMIENTO",
   "DESACATO",
   "OBSTRUCCIÓN DE LA JUSTICIA",
