@@ -7,30 +7,58 @@ const outputDir = "../pruebas/datos_salida/";
 
 // Definición de tipos de faltas
 const faltasGraves = [
-  "CEX",
-  "PEC",
-  "DRP",
-  "UII",
-  "AFN",
-  "ABCI",
-  "CIND",
-  "EOCI",
-  "TINF",
-  "ENCB",
-  s3p / DURANGO / Rregistro.jsonls,
+  "COHECHO O EXTORSION",
+  "PECULADO",
+  "DESVÍO DE RECURSOS PÚBLICOS",
+  "UTILIZACIÓN INDEBIDA DE INFORMACIÓN",
+  "ABUSO DE FUNCIONES",
+  "ACTUACIÓN BAJO CONFLICTO DE INTERÉS",
+  "CONTRATACIÓN INDEBIDA",
+  "ENRIQUECIMIENTO OCULTO U OCULTAMIENTO DE CONFLICTO DE INTERÉS",
+  "TRÁFICO DE INFLUENCIAS",
+  "ENCUBRIMIENTO",
+  "DESACATO",
+  "OBSTRUCCIÓN DE LA JUSTICIA",
+  "ADMINISTRATIVA GRAVE",
 ];
-const faltasNoGraves = ["NAD", "IDSP", "ANG"];
+
+const faltasNoGraves = [
+  "NEGLIGENCIA ADMINISTRATIVA",
+  "INCUMPLIMIENTO EN DECLARACION DE SITUACION PATRIMONIAL",
+  "ADMINISTRATIVA NO GRAVE",
+];
 
 function clasificarPorTipoFalta(falta) {
-  if (falta === "Dato no proporcionado" || falta === "") {
-    return "vacio";
+  // Caso cuando tipoFalta es un string
+  if (typeof falta === "string") {
+    if (falta === "Dato no proporcionado" || falta === "") {
+      return "vacio";
+    }
+    return "otro";
   }
-  if (faltasGraves.includes(falta)) {
-    return "grave";
+
+  // Caso cuando tipoFalta es un objeto
+  if (falta && typeof falta === "object") {
+    // Si no existe la clave o es vacía
+    if (!falta.clave) {
+      return "vacio";
+    }
+
+    const clave = falta.clave;
+
+    // Para los casos específicos
+    if (clave === "OTRO" || clave === "otro") {
+      return "otro";
+    }
+    if (clave === "AG") return "grave";
+    if (clave === "ANG") return "no_grave";
+
+    // Para el resto de los casos
+    if (faltasGraves.includes(clave)) return "grave";
+    if (faltasNoGraves.includes(clave)) return "no_grave";
   }
-  if (faltasNoGraves.includes(falta)) {
-    return "no_grave";
-  }
+
+  // Si no cumple ninguna condición anterior
   return "otro";
 }
 
@@ -222,74 +250,110 @@ async function crearDirectorioSiNoExiste(dir) {
 }
 
 async function escribirArchivo(directorio, nombreArchivo, contenido) {
-  await crearDirectorioSiNoExiste(directorio);
-  const rutaCompleta = path.join(directorio, nombreArchivo);
-  await fs.writeFile(rutaCompleta, JSON.stringify(contenido, null, 2));
+  try {
+    await crearDirectorioSiNoExiste(directorio);
+    const rutaCompleta = path.join(directorio, nombreArchivo);
+    await fs.writeFile(rutaCompleta, JSON.stringify(contenido, null, 2));
+    console.log(`Archivo escrito exitosamente: ${rutaCompleta}`);
+  } catch (error) {
+    console.error(`Error escribiendo archivo ${nombreArchivo}:`, error);
+  }
 }
 
 async function procesarArchivo(rutaArchivo) {
   try {
+    console.log(`Procesando archivo: ${rutaArchivo}`);
     const contenido = await fs.readFile(rutaArchivo, "utf8");
-    const datos = JSON.parse(contenido);
+    let datos;
+    try {
+      datos = JSON.parse(contenido);
+    } catch (parseError) {
+      console.error(
+        `Error parsing JSON en archivo ${rutaArchivo}:`,
+        parseError
+      );
+      console.log(
+        "Contenido problemático:",
+        contenido.substring(
+          Math.max(parseError.position - 50, 0),
+          parseError.position + 50
+        )
+      );
+      return;
+    }
+
     const registros = Array.isArray(datos) ? datos : [datos];
 
     // Obtener el nombre del directorio padre para el prefijo
     const dirPadre = path.basename(path.dirname(rutaArchivo));
     const nombreArchivo = `procesado_${dirPadre}_${path.basename(rutaArchivo)}`;
 
-    const servidoresPublicos = {
-      grave: [],
-      no_grave: [],
-      vacio: [],
-    };
-
-    const particulares = {
-      fisica: [],
-      moral: [],
+    // Inicializar las estructuras para almacenar los resultados
+    const resultados = {
+      SERVIDOR_PUBLICO_SANCIONADO: {
+        grave: [],
+        no_grave: [],
+        vacio: [],
+        otro: [],
+      },
+      PARTICULAR_SANCIONADO: {
+        fisica: [],
+        moral: [],
+        otros: [],
+      },
     };
 
     // Procesar cada registro
     for (const registro of registros) {
-      if (registro.servidorPublicoSancionado) {
-        const tipoFalta = registro.tipoFalta?.clave;
-        const clasificacion = clasificarPorTipoFalta(tipoFalta);
-        const datosTransformados = transformarServidorPublico(
-          registro,
-          clasificacion
-        );
-        servidoresPublicos[clasificacion].push(datosTransformados);
-      } else if (registro.particularSancionado) {
-        const tipoPersona = registro.particularSancionado.tipoPersona;
-        const categoria =
-          tipoPersona === "F"
-            ? "fisica"
-            : tipoPersona === "M"
-            ? "moral"
-            : "otros";
-        const datosTransformados = transformarParticular(registro, tipoPersona);
-        if (categoria === "fisica" || categoria === "moral") {
-          particulares[categoria].push(datosTransformados);
+      try {
+        if (registro.servidorPublicoSancionado) {
+          const tipoFalta = registro.tipoFalta?.clave;
+          const clasificacion = clasificarPorTipoFalta(tipoFalta);
+          const datosTransformados = transformarServidorPublico(registro);
+
+          if (!resultados.SERVIDOR_PUBLICO_SANCIONADO[clasificacion]) {
+            resultados.SERVIDOR_PUBLICO_SANCIONADO[clasificacion] = [];
+          }
+          resultados.SERVIDOR_PUBLICO_SANCIONADO[clasificacion].push(
+            datosTransformados
+          );
+        } else if (registro.particularSancionado) {
+          const tipoPersona = registro.particularSancionado.tipoPersona;
+          let categoria = "otros";
+
+          if (tipoPersona === "F") categoria = "fisica";
+          else if (tipoPersona === "M") categoria = "moral";
+
+          const datosTransformados = transformarParticular(registro);
+
+          if (!resultados.PARTICULAR_SANCIONADO[categoria]) {
+            resultados.PARTICULAR_SANCIONADO[categoria] = [];
+          }
+          resultados.PARTICULAR_SANCIONADO[categoria].push(datosTransformados);
         }
+      } catch (regError) {
+        console.error(`Error procesando registro en ${rutaArchivo}:`, regError);
+        console.log(
+          "Registro problemático:",
+          JSON.stringify(registro).substring(0, 200) + "..."
+        );
       }
     }
 
-    // Escribir archivos para servidores públicos
-    for (const [tipo, datos] of Object.entries(servidoresPublicos)) {
-      if (datos.length > 0) {
-        const dir = path.join(outputDir, "SERVIDOR_PUBLICO_SANCIONADO", tipo);
-        await escribirArchivo(dir, nombreArchivo, datos);
-      }
-    }
-
-    // Escribir archivos para particulares
-    for (const [tipo, datos] of Object.entries(particulares)) {
-      if (datos.length > 0) {
-        const dir = path.join(outputDir, "PARTICULAR_SANCIONADO", tipo);
-        await escribirArchivo(dir, nombreArchivo, datos);
+    // Escribir los resultados
+    for (const [tipoSancion, categorias] of Object.entries(resultados)) {
+      for (const [categoria, datos] of Object.entries(categorias)) {
+        if (datos && datos.length > 0) {
+          const directorioSalida = path.join(outputDir, tipoSancion, categoria);
+          await escribirArchivo(directorioSalida, nombreArchivo, datos);
+        }
       }
     }
   } catch (error) {
     console.error(`Error procesando archivo ${rutaArchivo}:`, error);
+    if (error.code === "ENOENT") {
+      console.error("El archivo no existe");
+    }
   }
 }
 
