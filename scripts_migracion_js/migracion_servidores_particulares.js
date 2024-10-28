@@ -2,7 +2,7 @@ const fs = require("fs").promises;
 const path = require("path");
 
 // Define input and output paths
-const inputDir = "../pruebas/datos_entrada/s3s/";
+const inputDir = "../pruebas/datos_entrada/";
 const outputDir = "../pruebas/datos_salida/";
 
 // Definición de tipos de faltas
@@ -56,8 +56,7 @@ function clasificarPorTipoFalta(falta) {
 }
 
 function transformarServidorPublico(entrada, tipoSalida) {
-  const salida = {
-    id: entrada.id || "",
+  const esquemaBase = {
     fecha: entrada.fechaCaptura || "",
     expediente: entrada.expediente || "",
     datosGenerales: {
@@ -74,79 +73,146 @@ function transformarServidorPublico(entrada, tipoSalida) {
       ambitoPublico: "",
       nombreEntePublico: entrada.institucionDependencia?.nombre || "",
       siglasEntePublico: entrada.institucionDependencia?.siglas || "",
-      nivelJerarquico: {
-        clave: "",
-        valor: "",
-      },
+      nivelJerarquico:
+        "obtenerNivelJerarquico(entrada.servidorPublicoSancionado?.puesto)",
       denominacion: entrada.servidorPublicoSancionado?.puesto || "",
       areaAdscripcion: "",
     },
-    faltaCometida: [
-      {
-        clave: entrada.tipoFalta?.clave || "",
-        valor: entrada.tipoFalta?.valor || "",
-        descripcionHechos: entrada.causaMotivoHechos || "",
-        normatividadInfringida: {
-          nombreNormatividad: "",
-          articulo: "",
-          fraccion: "",
-        },
-      },
-    ],
-    resolucion: {
-      tituloDocumento: "",
-      fechaResolucion: entrada.resolucion?.fechaResolucion || "",
-      fechaNotificacion: "",
-      urlResolucion: entrada.resolucion?.url || "",
-      fechaResolucionFirme: "",
-      fechaNotificacionFirme: "",
-      fechaEjecucion: "",
-      ordenJurisdiccional: "",
-      autoridadResolutora: entrada.autoridadSancionadora || "",
-      autoridadInvestigadora: "",
-      autoridadSubstanciadora: "",
+    origenProcedimiento: {
+      clave: "",
+      valor: "",
     },
-    tipoSancion:
-      entrada.tipoSancion?.map((sancion) => ({
-        clave: sancion.clave || "",
-        suspension: {
-          plazoMeses: "",
-          plazoDias: "",
-          fechaInicial: "",
-          fechaFinal: "",
-        },
-        destitucionEmpleo: {
-          fechaDestitucion: "",
-        },
-        inhabilitacion: {
-          plazoAnios: "",
-          plazoMeses: "",
-          plazoDias: "",
-          fechaInicial: entrada.inhabilitacion?.fechaInicial || "",
-          fechaFinal: entrada.inhabilitacion?.fechaFinal || "",
-        },
-        sancionEconomica: {
-          monto: entrada.multa?.monto || "",
-          moneda: entrada.multa?.moneda?.valor || "",
-          plazoPago: {
-            anios: "",
-            meses: "",
-            dias: "",
-          },
-          sancionEfectivamenteCobrada: {
-            monto: "",
-            moneda: "",
-            fechaCobro: "",
-          },
-        },
-        otro: {
-          denominacionSancion: "",
-        },
-      })) || [],
-    observaciones: entrada.observaciones || "",
   };
 
-  return salida;
+  if (tipoSalida === "graves" || tipoSalida === "otro") {
+    return {
+      ...esquemaBase,
+      faltaCometida: [
+        {
+          clave: entrada.tipoFalta?.clave || "",
+          valor: entrada.tipoFalta?.valor || "",
+          normatividadInfringida: [
+            {
+              nombreNormatividad: "",
+              articulo: "",
+              fraccion: "",
+            },
+          ],
+          descripcionHechos: entrada.causaMotivoHechos || "",
+        },
+      ],
+      resolucion: {
+        tituloDocumento: "",
+        fechaResolucion: entrada.resolucion?.fechaResolucion || "",
+        fechaNotificacion: "",
+        urlResolucion: entrada.resolucion?.url || "",
+        fechaResolucionFirme: "",
+        fechaNotificacionFirme: "",
+        urlResolucionFirme: "",
+        autoridadResolutora: entrada.autoridadSancionadora || "",
+        ordenJurisdiccional: "",
+        fechaEjecucion: "",
+        autoridadInvestigadora: "",
+        autoridadSubstanciadora: "",
+      },
+      tipoSancion:
+        entrada.tipoSancion?.map((sancion) => ({
+          clave: sancion.clave || "",
+          suspension: {
+            plazoMeses: "",
+            plazoDias: "",
+            fechaInicial: "",
+            fechaFinal: "",
+          },
+          destitucionEmpleo: {
+            fechaDestitucion: "",
+          },
+          inhabilitacion: {
+            plazoAnios: "",
+            plazoMeses: "",
+            plazoDias: "",
+            fechaInicial: entrada.inhabilitacion?.fechaInicial || "",
+            fechaFinal: entrada.inhabilitacion?.fechaFinal || "",
+          },
+          sancionEconomica: {
+            monto: entrada.multa?.monto || "",
+            moneda: entrada.multa?.moneda?.valor || "",
+            plazoPago: {
+              anios: "",
+              meses: "",
+              dias: "",
+            },
+            sancionEfectivamenteCobrada: {
+              monto: "",
+              moneda: "",
+              fechaCobro: "",
+            },
+            fechaPagoTotal: "",
+          },
+          otro: {
+            denominacionSancion: "",
+          },
+        })) || [],
+      observaciones: entrada.observaciones || "",
+    };
+  } else {
+    // no_graves
+    return {
+      ...esquemaBase,
+      faltaCometida: [
+        {
+          clave: entrada.tipoFalta?.clave || "",
+          valor: entrada.tipoFalta?.valor || "",
+          normatividadInfringida: [
+            {
+              nombreNormatividad: "",
+              articulo: "",
+              fraccion: "",
+            },
+          ],
+          descripcionHechos: entrada.causaMotivoHechos || "",
+        },
+      ],
+      resolucion: {
+        tituloDocumento: "",
+        fechaResolucion: entrada.resolucion?.fechaResolucion || "",
+        fechaNotificacion: "",
+        fechaResolucionFirme: "",
+        fechaNotificacionFirme: "",
+        fechaEjecucion: "",
+        autoridadResolutora: entrada.autoridadSancionadora || "",
+        autoridadInvestigadora: "",
+        autoridadSubstanciadora: "",
+      },
+      tipoSancion:
+        entrada.tipoSancion?.map((sancion) => ({
+          clave: sancion.clave || "",
+          amonestacion: {
+            tipo: "",
+          },
+          suspension: {
+            plazoMeses: "",
+            plazoDias: "",
+            plazoFechaInicial: "",
+            plazoFechaFinal: "",
+          },
+          destitucionEmpleo: {
+            fechaDestitucion: "",
+          },
+          inhabilitacion: {
+            plazoAnios: "",
+            plazoMeses: "",
+            plazoDias: "",
+            plazoFechaInicial: entrada.inhabilitacion?.fechaInicial || "",
+            plazoFechaFinal: entrada.inhabilitacion?.fechaFinal || "",
+          },
+          otro: {
+            denominacionSancion: "",
+          },
+        })) || [],
+      observaciones: entrada.observaciones || "",
+    };
+  }
 }
 
 function transformarParticular(entrada, tipoPersona) {
@@ -281,7 +347,10 @@ async function procesarArchivo(rutaArchivo) {
       try {
         if (registro.servidorPublicoSancionado) {
           const clasificacion = clasificarPorTipoFalta(registro.tipoFalta);
-          const datosTransformados = transformarServidorPublico(registro);
+          const datosTransformados = transformarServidorPublico(
+            registro,
+            clasificacion
+          );
           resultados.SERVIDOR_PUBLICO_SANCIONADO[clasificacion].push(
             datosTransformados
           );
@@ -295,7 +364,10 @@ async function procesarArchivo(rutaArchivo) {
               : null;
 
           if (categoria) {
-            const datosTransformados = transformarParticular(registro);
+            const datosTransformados = transformarParticular(
+              registro,
+              categoria
+            );
             resultados.PARTICULAR_SANCIONADO[categoria].push(
               datosTransformados
             );
