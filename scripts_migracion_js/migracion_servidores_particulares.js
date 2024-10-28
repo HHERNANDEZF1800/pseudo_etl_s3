@@ -27,7 +27,6 @@ const faltasNoGraves = [
   "INCUMPLIMIENTO EN DECLARACION DE SITUACION PATRIMONIAL",
   "ADMINISTRATIVA NO GRAVE",
 ];
-1;
 
 function clasificarPorTipoFalta(falta) {
   // Si no hay falta, va a otro
